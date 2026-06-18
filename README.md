@@ -1,4 +1,4 @@
-# David Fifer — Engineering Portfolio
+# David Fifer - Engineering Portfolio
 
 A curated set of backend engineering and automation projects focused on **distributed systems**, **backend services**, and **developer tooling**.  
 This repository supports my portfolio site at **davidfifer.github.io**.
