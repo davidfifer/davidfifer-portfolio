@@ -21,4 +21,3 @@ Each project includes a concise README, flowchart diagram, and usage details.
 - Backend engineering  
 - Distributed systems  
 - CI/CD
-- 
