@@ -1,0 +1,32 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+
+# Local config overrides (if you ever add them)
+*.local
+*.env
+
+# --- IDE / Editor ---
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# --- OS Files ---
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
