@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=69.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "csv-cleaner"
+version = "0.1.0"
+description = "A flexible CSV cleaning and exporting utility with profiling and configuration support."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+authors = [
+    { name = "David Fifer" }
+]
+
+keywords = [
+    "csv",
+    "data-cleaning",
+    "automation",
+    "export",
+    "utility",
+    "cli"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "typer>=0.12.0",
+    "pandas>=2.0.0",
+    "pyyaml>=6.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/davidfifer/davidfifer-portfolio"
+Source = "https://github.com/davidfifer/davidfifer-portfolio/python/csv_data_cleaner"
+
+# -----------------------------
+# CLI Entrypoint
+# -----------------------------
+[project.scripts]
+csv-cleaner = "csv_cleaner.__main__:main"
+
+# -----------------------------
+# Packaging Configuration
+# -----------------------------
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# -----------------------------
+# Pytest Configuration
+# -----------------------------
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = [
+    "--strict-markers",
+    "--disable-warnings",
+    "--maxfail=1"
+]
+
+# -----------------------------
+# Ruff Linter (optional)
+# -----------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+# -----------------------------
+# Black Formatter (optional)
+# -----------------------------
+[tool.black]
+line-length = 100
+target-version = ["py39"]
+
+# -----------------------------
+# Coverage Configuration
+# -----------------------------
+[tool.coverage.run]
+source = ["src/csv_cleaner"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

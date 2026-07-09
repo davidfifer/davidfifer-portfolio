@@ -1,0 +1,4 @@
+user_id,email,age,price,signup_date,is_active,status,country,zip_code
+1,test@example.com,30,10.5,2024-01-01,true,ok,us,12345
+2,test2@example.com,40,20.5,2024-01-02,false,ok,canada,54321
+3,test3@example.com,25,15.5,2024-01-03,true,ok,us,67890

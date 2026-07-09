@@ -1,0 +1,2 @@
+user id, emailaddress , AGE , Price , signup date , is_active , status , country , zipcode
+1,TEST@EXAMPLE.COM,30,10.5,2024-01-01,true,ok,us,12345

@@ -1,0 +1,145 @@
+normalize_columns:
+  enabled: true
+  alias_map:
+    emailaddress: email
+    email_address: email
+    e_mail: email
+    zip: zip_code
+    zipcode: zip_code
+
+headers:
+  enabled: true
+  required:
+    - user_id
+    - email
+    - age
+    - price
+    - signup_date
+    - is_active
+    - status
+    - country
+    - zip_code
+  allow_unnamed: false
+
+schema:
+  enabled: true
+  required:
+    - user_id
+    - email
+    - age
+    - price
+    - signup_date
+    - is_active
+    - status
+    - country
+    - zip_code
+  drop_extra: true
+  columns:
+    user_id:
+      type: int
+    email:
+      type: string
+    age:
+      type: int
+    price:
+      type: float
+    signup_date:
+      type: date
+    is_active:
+      type: bool
+    status:
+      type: string
+    country:
+      type: string
+    zip_code:
+      type: string
+
+trim_strings:
+  enabled: true
+  collapse_internal: false
+  columns:
+    - user_id
+    - email
+    - age
+    - price
+    - signup_date
+    - is_active
+    - status
+    - country
+    - zip_code
+
+empty_rows:
+  enabled: true
+  drop_all_nan: true
+  drop_all_empty_strings: true
+  drop_whitespace_only: true
+
+fill_missing_values:
+  enabled: true
+  defaults:
+    numeric: median
+    categorical: mode
+    datetime: ffill
+    text: empty
+    id: forbid
+  columns:
+    age: mean
+    signup_date: '1970-01-01'
+    status: 'Unknown'
+
+dtypes:
+  enabled: true
+  columns:
+    user_id: int
+    email: string
+    age: int
+    price: float
+    signup_date: datetime
+    is_active: bool
+    status: string
+    country: string
+    zip_code: string
+  on_error: coerce
+
+numeric:
+  enabled: true
+  columns:
+    - age
+    - price
+  on_error: raise
+
+dates:
+  enabled: true
+  columns:
+    - signup_date
+  format: "%Y-%m-%d"
+  on_error: "coerce"
+  strict: true
+
+remove_duplicates:
+  enabled: true
+  subset:
+    - email
+    - user_id
+  keep: first
+  case_insensitive: false
+
+row_filters:
+  enabled: true
+  required_columns:
+    - email
+    - user_id
+  drop_if_equals:
+    status:
+      - deleted
+      - inactive
+  numeric_ranges:
+    age:
+      min: 0
+      max: 120
+  regex:
+    email: '^[^@]+@[^@]+\.[^@]+$'
+  keep_if:
+    country:
+      - us
+      - canada

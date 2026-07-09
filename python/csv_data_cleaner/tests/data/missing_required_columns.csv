@@ -1,0 +1,2 @@
+user_id,email,age,price,signup_date,is_active,status,country
+1,test@example.com,30,10.5,1/1/2024,TRUE,ok,us
