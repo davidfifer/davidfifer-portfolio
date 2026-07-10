@@ -65,40 +65,34 @@ current state of the cleaner and the next set of enhancements focused on reliabi
 
 ### Validation & Safety
 
-Schema validation for configuration files using Pydantic or JSON Schema
-
-Ensures configs are well‑formed, typed correctly, and fail fast when misconfigured.
+- Schema validation for configuration files using Pydantic or JSON Schema
+- Ensures configs are well‑formed, typed correctly, and fail fast when misconfigured.
 
 ### Quality & Testing
 
-Unit test suite covering normalization, missing‑value strategies, dtype conversion, trimming, deduplication, and row
+- Unit test suite covering normalization, missing‑value strategies, dtype conversion, trimming, deduplication, and row
 filters
-
-Improves confidence and prevents regressions as the cleaner evolves.
+- Improves confidence and prevents regressions as the cleaner evolves.
 
 ### Observability & Debugging
 
-Logging and debug mode
-
-Provides detailed insight into which cleaning steps ran, how many rows changed, and why.
+- Logging and debug mode
+- Provides detailed insight into which cleaning steps ran, how many rows changed, and why.
 
 ### Performance & Scalability
 
-Performance refactor
-
-Reduces unnecessary copies, optimizes dtype scans, and improves handling of large datasets.
+- Performance refactor
+- Reduces unnecessary copies, optimizes dtype scans, and improves handling of large datasets.
 
 ### Extensibility
 
-Plugin/extension hooks
-
-Allows users to inject custom cleaning functions into the pipeline.
+- Plugin/extension hooks
+- Allows users to inject custom cleaning functions into the pipeline.
 
 ### Documentation & Examples
 
-Example datasets and tutorials
-
-Demonstrates real‑world usage patterns and before/after transformations.
+- Example datasets and tutorials
+- Demonstrates real‑world usage patterns and before/after transformations.
 
 ### Completed
 
@@ -326,7 +320,7 @@ $ python -m csv_cleaner clean --show-profile data.csv -c config.yaml -o cleaned.
 $ python -m csv_cleaner profile data.csv
 ```
 
-## Show Version
+### Show Version
 
 ```shell
 $ python -m csv_cleaner version
@@ -338,7 +332,7 @@ $ python -m csv_cleaner version
 
 The CLI is built using Typer:
 
-“CSV Cleaner – cleanup and profile CSV files.”
+- CSV Cleaner – cleanup and profile CSV files
 
 ### Commands
 
@@ -382,7 +376,7 @@ python -m csv_cleaner clean test.csv -c config.yaml -o out.csv
 
 ---
 
-### Technologies
+## Technologies
 
 | Technology       | Purpose                       |
 |------------------|-------------------------------|
@@ -428,7 +422,7 @@ David Fifer – [@AuthorLinkedIn](https://www.linkedin.com/in/david-b-fifer) –
 
 ---
 
-### Change Log
+## Change Log
 
 | Version   | Notes           |
 |-----------|-----------------|

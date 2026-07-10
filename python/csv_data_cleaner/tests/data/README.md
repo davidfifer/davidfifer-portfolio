@@ -7,7 +7,7 @@ A comprehensive dataset for validation, normalization, and error‑handling test
 ## Overview
 
 This suite provides a complete, end‑to‑end collection of CSV test files designed to exercise every major rule defined in
-the data‑cleaning configuration—from column normalization and string trimming to strict numeric/date validation,
+the data‑cleaning configuration from column normalization and string trimming to strict numeric/date validation,
 missing‑value strategies, schema enforcement, and row‑level filtering.
 
 Each file isolates a specific class of input irregularities, allowing tests to precisely target behaviors such as
@@ -69,8 +69,6 @@ These datasets are intended for:
 Typical usage:
 - load_csv("tests/data/bad_numeric_values.csv")
 
-All files reside in tests/data/.
-
 ---
 
 ## Test file details
@@ -81,14 +79,14 @@ All files reside in tests/data/.
 pipeline detects and rejects values that cannot be parsed as integers or decimals, while still processing valid rows
 normally.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Invalid integer parsing
 - Invalid decimal parsing
 - Selective failure behavior
 - Row‑level error handling
 
-#### Sample csv
+#### Sample csv:
 
 | user_id | email             | age              | price         | signup_date | is_active | status | country | zip_code |
 |---------|-------------------|------------------|---------------|-------------|-----------|--------|---------|----------|
@@ -103,14 +101,14 @@ normally.
 repeated records, removes or reports them according to your configuration, and preserves unique rows without
 interference.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Duplicate row detection
 - Primary key uniqueness
 - Row‑level deduplication behavior
 - No false positives
 
-#### Sample csv
+#### Sample csv:
 
 | user_id | email             | age | price | signup_date | is_active | status | country | zip_code |
 |---------|-------------------|-----|-------|-------------|-----------|--------|---------|----------|
@@ -125,14 +123,14 @@ interference.
 - This test file validates how your pipeline handles fully empty rows. It ensures blank records are detected and dropped
 or reported, while surrounding valid rows continue to be processed correctly.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Empty row detection
 - Required column enforcement
 - Row‑level drop behavior
 - No interference with valid rows
 
-#### Sample csv
+#### Sample csv:
 
 | user_id   | email             | age       | price     | signup_date | is_active | status    | country   | zip_code  |
 |-----------|-------------------|-----------|-----------|-------------|-----------|-----------|-----------|-----------|
@@ -148,14 +146,14 @@ or reported, while surrounding valid rows continue to be processed correctly.
 are not part of the defined schema. It ensures the pipeline can detect, ignore, drop, or report extra fields without
 affecting the processing of valid, expected columns.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Unexpected column detection
 - Schema enforcement
 - Column filtering behavior
 - No interference with valid data
 
-#### Sample csv
+#### Sample csv:
 
 | user_id | email            | age | price | signup_date | is_active | status | country | zip_code | extra1 | extra2 |
 |---------|------------------|-----|-------|-------------|-----------|--------|---------|----------|--------|--------|
@@ -169,14 +167,14 @@ affecting the processing of valid, expected columns.
 ensures the pipeline can parse quoted integers, decimals, dates, and booleans as valid values, treating them the same
 as unquoted numeric fields.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Quoted numeric parsing
 - Quoted boolean/date parsing
 - Schema consistency
 - Valid row processing
 
-#### Sample csv
+#### Sample csv:
 
 | user_id | email             | age  | price  | signup_date  | is_active | status | country | zip_code |
 |---------|-------------------|------|--------|--------------|-----------|--------|---------|----------|
@@ -190,14 +188,14 @@ as unquoted numeric fields.
 - This test file verifies that the pipeline correctly handles invalid or non‑parseable date values. It ensures the
 system rejects or reports malformed dates while continuing to validate rows with proper date formats.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Date parsing
 - Coercion handling
 - Schema consistency
 - Valid row processing
 
-#### Sample csv
+#### Sample csv:
 
 | user_id | email             | age | price | signup_date    | is_active | status | country | zip_code |
 |---------|-------------------|-----|-------|----------------|-----------|--------|---------|----------|
@@ -211,14 +209,14 @@ system rejects or reports malformed dates while continuing to validate rows with
 - This test file verifies that the pipeline correctly handles missing or blank column headers. It ensures the system
 detects incomplete header definitions and applies header‑level validation before processing any rows.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Header validation
 - Schema enforcement
 - Positional inference
 - Valid row processing
 
-#### Sample csv
+#### Sample csv:
 
 | user_id | email            | age | price | signup_date | is_active | status | country | zip_code |
 |---------|------------------|-----|-------|-------------|-----------|--------|---------|----------|
@@ -231,14 +229,14 @@ detects incomplete header definitions and applies header‑level validation befo
 - This test file verifies that the pipeline correctly handles rows missing required columns. It ensures the system
 detects incomplete records and rejects or flags them when mandatory fields (such as zip_code) are absent.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Required‑column validation
 - Schema enforcement
 - Row‑level rejection
 - Valid row processing
 
-#### Sample csv
+#### Sample csv:
 
 | user_id | email            | age | price | signup_date  | is_active | status | country |
 |---------|------------------|-----|-------|--------------|-----------|--------|---------|
@@ -251,7 +249,7 @@ detects incomplete records and rejects or flags them when mandatory fields (such
 - This test file verifies that the pipeline correctly handles missing values across multiple columns. It ensures the
 system applies default fill rules, column‑specific overrides, or row‑level rejection depending on your configuration.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Missing‑value detection
 - Default fill rules
@@ -259,7 +257,7 @@ system applies default fill rules, column‑specific overrides, or row‑level r
 - Schema enforcement
 - Valid row processing
 
-#### Sample csv
+#### Sample csv:
 
 | user_id | email             | age         | price       | signup_date | is_active | status      | country |
 |---------|-------------------|-------------|-------------|-------------|-----------|-------------|---------|
@@ -274,7 +272,7 @@ system applies default fill rules, column‑specific overrides, or row‑level r
 - This test file verifies that the pipeline correctly performs column normalization, converting messy, inconsistent, or
 incorrectly formatted headers into their canonical schema names.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Header normalization
 - Alias mapping
@@ -282,7 +280,7 @@ incorrectly formatted headers into their canonical schema names.
 - Schema enforcement
 - Valid row processing
 
-#### Sample csv
+#### Sample csv:
 
 | emailaddress | zip              | age | price | signup_date | is_active | status | country | user_id |
 |--------------|------------------|-----|-------|-------------|-----------|--------|---------|---------|
@@ -296,7 +294,7 @@ incorrectly formatted headers into their canonical schema names.
 numeric ranges, drop‑if conditions, and keep‑if conditions. It ensures only rows meeting all configured filter criteria
 survive.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Regex validation
 - Numeric range filtering
@@ -305,7 +303,7 @@ survive.
 - Schema enforcement
 - Valid row processing
 
-#### Sample csv
+#### Sample csv:
 
 | email | zip_code               | age         | price       | signup_date | is_active   | status      | country     | user_id     |
 |-------|------------------------|-------------|-------------|-------------|-------------|-------------|-------------|-------------|
@@ -329,14 +327,14 @@ survive.
 - This test file verifies that the pipeline correctly performs string trimming, ensuring leading and trailing whitespace
 is removed from string fields without altering internal spacing or valid content.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Whitespace trimming
 - Canonical normalization
 - Schema enforcement
 - Valid row processing
 
-#### Sample csv
+#### Sample csv:
 
 | email | zip_code         | age | price | signup_date | is_active | status | country | user_id |
 |-------|------------------|-----|-------|-------------|-----------|--------|---------|---------|
@@ -349,7 +347,7 @@ is removed from string fields without altering internal spacing or valid content
 - This test file verifies that the pipeline correctly handles unnamed or placeholder headers. It ensures the system
 detects incomplete or auto‑generated header names and applies header‑level validation before processing any rows.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Header validation
 - Missing/placeholder header detection
@@ -357,7 +355,7 @@ detects incomplete or auto‑generated header names and applies header‑level v
 - Positional inference
 - Valid row processing
 
-#### Sample csv
+#### Sample csv:
 
 | unnamed header | email            | age | price | signup_date | is_active | status | country | zip_code |
 |----------------|------------------|-----|-------|-------------|-----------|--------|---------|----------|
@@ -371,7 +369,7 @@ detects incomplete or auto‑generated header names and applies header‑level v
 already meet all schema, type, and formatting requirements without triggering normalization, coercion, or error
 handling.
 
-#### Scenarios Covered
+#### Scenarios Covered:
 
 - Schema compliance
 - Type correctness
@@ -379,7 +377,7 @@ handling.
 - No normalization required
 - Valid row processing
 
-#### Sample csv
+#### Sample csv:
 
 | email | zip_code          | age | price | signup_date | is_active | status | country | user_id |
 |-------|-------------------|-----|-------|-------------|-----------|--------|---------|---------|
