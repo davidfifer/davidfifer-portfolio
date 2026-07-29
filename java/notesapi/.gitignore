@@ -1,0 +1,86 @@
+############################
+# Build Artifacts
+############################
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+
+############################
+# Maven Wrapper
+############################
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+############################
+# Logs
+############################
+*.log
+logs/
+
+############################
+# OS Junk
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# IDE / Editor Files
+############################
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code
+.vscode/
+
+# Eclipse / STS
+.project
+.classpath
+.settings/
+.springBeans
+.sts4-cache
+.apt_generated
+.factorypath
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+############################
+# Docker
+############################
+.env
+.env.docker
+docker-data/
+docker-compose.override.yml
+
+############################
+# Application Secrets
+############################
+*.env
+*.key
+*.pem
+*.crt
+
+############################
+# Temporary Files
+############################
+*.tmp
+*.swp
+*.swo
+
+############################
+# Java Tooling
+############################
+hs_err_pid*
+replay_pid*
