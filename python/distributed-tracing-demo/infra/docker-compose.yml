@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  frontend-service:
+    build: ../frontend-service
+    container_name: frontend-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - api-service
+
+  api-service:
+    build: ../api-service
+    container_name: api-service
+    ports:
+      - "8001:8000"
+    depends_on:
+      - worker-service
+
+  worker-service:
+    build: ../worker-service
+    container_name: worker-service
+    ports:
+      - "8002:8000"
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - "16686:16686"
+      - "4318:4318"
