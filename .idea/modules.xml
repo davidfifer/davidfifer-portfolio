@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/davidfifer-portfolio.iml" filepath="$PROJECT_DIR$/.idea/davidfifer-portfolio.iml" />
-      <module fileurl="file://$PROJECT_DIR$/java/distributed-tracing-demo/distributed-tracing-demo.iml" filepath="$PROJECT_DIR$/java/distributed-tracing-demo/distributed-tracing-demo.iml" />
     </modules>
   </component>
 </project>
