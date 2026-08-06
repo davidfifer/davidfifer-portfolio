@@ -394,7 +394,7 @@ python -m csv_cleaner clean test.csv -c config.yaml -o out.csv
 
 To contribute to the development of csv_data_cleaner, follow the steps below:
 
-1. Fork csv_data_cleaner from https://github.com/davidfifer/davidfifer-portfolio/python/fork
+1. Fork csv_data_cleaner from https://github.com/davidfifer/davidfifer-portfolio/fork
 2. Create your feature branch (`git checkout -b feature-new`)
 3. Make your changes
 4. Commit your changes (`git commit -am 'Add new feature'`)
@@ -407,10 +407,10 @@ To contribute to the development of csv_data_cleaner, follow the steps below:
 
 A huge thank you to everyone who has put their time and effort into improving this project.
 
-| Name            | GitHub                                       | Role                      |
-|-----------------|----------------------------------------------|---------------------------|
-| **David Fifer** | [@davidfifer](https://github.com/davidfifer) | Creator & Maintainer      |
-| **Community**   | PRs welcome                                  | Features, Fixes, Feedback |
+| Name                  | GitHub                                                                | Role                      |
+|-----------------------|-----------------------------------------------------------------------|---------------------------|
+| **David Fifer**       | [@davidfifer](https://github.com/davidfifer)                          | Creator & Maintainer      |
+| **Community Members** | [Open a PR](https://github.com/davidfifer/davidfifer-portfolio/pulls) | Features, fixes, feedback |
 
 If you’d like to contribute, check out the [Contributing](#contributing) and submit a pull request.
 

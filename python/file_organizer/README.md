@@ -255,7 +255,7 @@ This project is built using the following technologies:
 
 To contribute to the development of file_organizer, follow the steps below:
 
-1. Fork file_organizer from https://github.com/davidfifer/davidfifer-portfolio/python/fork
+1. Fork file_organizer from https://github.com/davidfifer/davidfifer-portfolio/fork
 2. Create your feature branch (`git checkout -b feature-new`)
 3. Make your changes
 4. Commit your changes (`git commit -am 'Add new feature'`)
@@ -268,10 +268,10 @@ To contribute to the development of file_organizer, follow the steps below:
 
 A huge thank you to everyone who has put their time and effort into improving this project.
 
-| **[Name](ca://s?q=Tell_me_more_about_contributor_names)** | **[GitHub](ca://s?q=Explain_contributor_github_links)**                      | **[Contributions](ca://s?q=Explain_contribution_roles)** |
-|-----------------------------------------------------------|------------------------------------------------------------------------------|----------------------------------------------------------|
-| **David Fifer**                                           | [@davidfifer](https://github.com/davidfifer)                                 | Creator, architect, and maintainer                       |
-| **Community Members**                                     | [Open a PR](https://github.com/davidfifer/davidfifer-portfolio/python/pulls) | Features, fixes, feedback                                |
+| **[Name](ca://s?q=Tell_me_more_about_contributor_names)** | **[GitHub](ca://s?q=Explain_contributor_github_links)**               | **[Contributions](ca://s?q=Explain_contribution_roles)** |
+|-----------------------------------------------------------|-----------------------------------------------------------------------|----------------------------------------------------------|
+| **David Fifer**                                           | [@davidfifer](https://github.com/davidfifer)                          | Creator, architect, and maintainer                       |
+| **Community Members**                                     | [Open a PR](https://github.com/davidfifer/davidfifer-portfolio/pulls) | Features, fixes, feedback                                |
 
 If you’d like to contribute, check out the [Contributing](#contributing) and submit a pull request.
 
