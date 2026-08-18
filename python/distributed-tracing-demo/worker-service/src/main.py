@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import random
 import time
 
@@ -23,9 +23,13 @@ app = FastAPI()
 FastAPIInstrumentor().instrument_app(app, tracer_provider=provider)
 
 @app.get("/work")
-def work():
-    if random.random() < 0.2:
+def work(chaos: bool = False):
+    # Slowdown only when chaos is enabled
+    if chaos and random.random() < 0.2:
         time.sleep(1.5)
-    if random.random() < 0.1:
-        raise Exception("Simulated worker failure")
-    return {"status": "ok"}
+
+    # Failure only when chaos is enabled
+    if chaos and random.random() < 0.1:
+        raise HTTPException(status_code=500, detail="Simulated worker failure")
+
+    return {"status": "ok", "chaos": chaos}

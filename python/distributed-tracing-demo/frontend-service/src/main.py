@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import requests
 
 # --- OpenTelemetry Setup ---
@@ -24,6 +24,14 @@ FastAPIInstrumentor().instrument_app(app, tracer_provider=provider)
 RequestsInstrumentor().instrument(tracer_provider=provider)
 
 @app.get("/start")
-def start():
-    resp = requests.get("http://api-service:8000/process")
-    return {"api_response": resp.json()}
+def start(chaos: bool = False):
+    try:
+        resp = requests.get(
+            "http://api-service:8000/process",
+            params={"chaos": chaos}
+        )
+        resp.raise_for_status()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"API error: {str(e)}")
+
+    return {"api_response": resp.json(), "chaos": chaos}

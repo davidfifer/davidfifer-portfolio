@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import requests
 import random
 import time
@@ -26,7 +26,18 @@ FastAPIInstrumentor().instrument_app(app, tracer_provider=provider)
 RequestsInstrumentor().instrument(tracer_provider=provider)
 
 @app.get("/process")
-def process():
-    time.sleep(random.uniform(0.1, 0.5))
-    resp = requests.get("http://worker-service:8000/work")
-    return {"worker_response": resp.json()}
+def process(chaos: bool = False):
+    # Latency injection only when chaos is enabled
+    if chaos:
+        time.sleep(random.uniform(0.1, 0.5))
+
+    try:
+        resp = requests.get(
+            "http://worker-service:8000/work",
+            params={"chaos": chaos}
+        )
+        resp.raise_for_status()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Worker error: {str(e)}")
+
+    return {"worker_response": resp.json(), "chaos": chaos}
