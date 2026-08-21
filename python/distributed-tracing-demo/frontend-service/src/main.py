@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException
 import requests
+import random
+import time
 
-# --- OpenTelemetry Setup ---
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
@@ -23,15 +24,36 @@ app = FastAPI()
 FastAPIInstrumentor().instrument_app(app, tracer_provider=provider)
 RequestsInstrumentor().instrument(tracer_provider=provider)
 
+tracer = trace.get_tracer("frontend-service")
+
 @app.get("/start")
 def start(chaos: bool = False):
-    try:
-        resp = requests.get(
-            "http://api-service:8000/process",
-            params={"chaos": chaos}
-        )
-        resp.raise_for_status()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"API error: {str(e)}")
 
-    return {"api_response": resp.json(), "chaos": chaos}
+    # --- Root span for frontend service ---
+    with tracer.start_as_current_span("frontend.start") as span:
+        span.set_attribute("chaos.enabled", chaos)
+
+        # --- Chaos-mode latency injection ---
+        if chaos:
+            injected = random.uniform(0.1, 0.4)
+            span.set_attribute("latency.injected_ms", injected * 1000)
+            time.sleep(injected)
+
+        try:
+            # --- Child span for api call ---
+            with tracer.start_as_current_span("frontend.call_api") as api_span:
+                api_span.set_attribute("api.url", "http://api-service:8000/process")
+                api_span.set_attribute("chaos.enabled", chaos)
+
+                resp = requests.get(
+                    "http://api-service:8000/process",
+                    params={"chaos": chaos}
+                )
+                resp.raise_for_status()
+
+        except Exception as e:
+            api_span.record_exception(e)
+            api_span.set_attribute("error", True)
+            raise HTTPException(status_code=500, detail=f"API error: {str(e)}")
+
+        return {"api_response": resp.json(), "chaos": chaos}

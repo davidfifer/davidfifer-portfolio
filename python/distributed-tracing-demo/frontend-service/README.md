@@ -1,45 +1,121 @@
 # Frontend Service
 
-This service is part of a multi‑service distributed tracing demonstration designed to show how trace context flows
-through a real request path. When a client calls `/start`, the frontend generates an initial span, performs an outbound
-HTTP request to the backend service, and emits telemetry that the collector aggregates into a single end‑to‑end trace. 
-By running this service alongside the backend and collector, you can observe how microservices participate in a shared
-trace and how instrumentation across frameworks and libraries contributes to a unified view of system behavior.
+The Frontend Service is the entry point of the distributed‑tracing demo. It exposes a `/start` endpoint, generates the
+initial trace context, and forwards requests to the API service. With automated OpenTelemetry instrumentation and
+manually defined spans, the frontend provides a clear view of how trace context is created, propagated, and enriched
+across microservices.
+
+This service demonstrates:
+
+- How inbound HTTP requests generate root spans
+- How outbound HTTP calls propagate trace context
+- How manual spans add semantic clarity
+- How chaos mode introduces latency and failures
+- How Jaeger visualizes end‑to‑end traces
 
 ---
 
 ## Overview
 
-The Frontend Service is a lightweight FastAPI application that exposes a `/start` endpoint and forwards requests to a
-backend API. It includes full OpenTelemetry instrumentation for inbound and outbound operations, enabling trace
-propagation across services. Traces are exported to an OpenTelemetry Collector for visualization in Jaeger, Tempo, or
-similar backends.
+The Frontend Service is a lightweight FastAPI application that:
 
----
-
-## Table of Contents
-
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Running with Docker](#running-with-docker)
-- [Dockerfile Overview](#dockerfile-overview)
-- [Contributing](#contributing)
-- [Contributors](#contributors)
-- [Author](#author)
-- [Change Log](#change-log)
-- [License](#license)
+- Accepts a request at `/start`
+- Creates a manual span (`frontend.start`)
+- Calls the API service using a traced outbound HTTP request
+- Emits telemetry to the OpenTelemetry Collector
+- Participates in chaos mode when enabled
+- All tracing is exported via OTLP and can be visualized...
 
 ---
 
 ## Features
 
-- FastAPI application structure
+- FastAPI application
 - Uvicorn ASGI server
+- Automated OpenTelemetry instrumentation
+  - FastAPI inbound request spans
+  - Requests outbound HTTP spans
+- Manual spans for clarity
+  - `frontend.start`
+  - `frontend.call_api`
+- Chaos‑mode latency + error injection
+- OTLP exporter to OpenTelemetry Collector
 - Dockerized environment using `python:3.11-slim`
-- Dependency installation via `requirements.txt`
-- OpenTelemetry tracing (FastAPI + Requests instrumentation)
-- OTLP exporter sending traces to an OpenTelemetry Collector
+
+---
+
+## Table of Contents
+
+- [Tracing Behavior](#tracing-behavior)
+- [Chaos Mode](#chaos-mode)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Running with Docker](#running-with-docker)
+- [Example Traces](#example-traces)
+
+---
+
+## Tracing Behavior
+
+### Automated Instrumentation
+
+The frontend automatically emits spans for:
+
+- Inbound HTTP requests (GET `/start`)
+- Outbound HTTP calls to the API service
+
+These spans include:
+
+- HTTP method
+- URL
+- Status code
+- Timing information
+- Trace context propagation headers
+
+### Manual Spans
+
+Two manual spans provide semantic clarity:
+
+- `frontend.start` - wraps the entire `/start` request handler
+- `frontend.call_api` - wraps the outbound call to the API service
+
+These spans make the trace hierarchy easier to read in Jaeger.
+
+### Trace Hierarchy (Normal Mode)
+
+```code
+frontend.start
+    frontend.call_api
+        api.process
+            api.call_worker
+                worker.work
+```
+
+---
+
+## Chaos Mode
+
+Chaos mode introduces:
+
+- Random latency (`latency.injected_ms`)
+- Random worker failures
+- Error propagation across services
+- Red spans in Jaeger when failures occur
+
+When chaos is enabled:
+
+```code
+http://localhost:8000/start?chaos=true
+```
+
+You may see:
+
+- `chaos.enabled = true`
+- `latency.injected_ms = <value>`
+- `error = true`
+- `otel.status_code = ERROR`
+
+Chaos mode is essential for demonstrating how distributed traces behave under failure conditions.
 
 ---
 
@@ -60,19 +136,18 @@ similar backends.
 ## Prerequisites
 
 - Docker installed
-- Backend API service running and reachable
+- API service running
+- Worker service running
 - OpenTelemetry Collector accepting OTLP traces
 
 ---
 
 ## Running with Docker
 
-Running the Frontend Service in Docker requires two environment variables:
+#### Required Environment Variables
 
-- `OTEL_EXPORTER_OTLP_ENDPOINT` - OTLP gRPC endpoint of your OpenTelemetry Collector
-- `BACKEND_URL` - the reachable URL of the backend service this frontend calls
-
-These variables are mandatory for trace export and request forwarding.
+- `OTEL_EXPORTER_OTLP_ENDPOINT` – OTLP HTTP endpoint of your OpenTelemetry Collector
+- `BACKEND_URL` - URL of the API service
 
 ### Build the Image
 
@@ -82,90 +157,43 @@ docker build -t frontend-service .
 
 ### Run the Container
 
-Start the service and pass the required environment variables:
-
 ```bash
 docker run -p 8000:8000 \
-  -e OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4317 \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318/v1/traces \
   -e BACKEND_URL=http://backend-service:8001 \
   frontend-service
 ```
 
-This command:
+### Access the Service
 
-- Exposes the service on port 8000
-- Points the OTLP exporter at the collector
-- Directs outbound requests to the backend service
-- Ensures trace context flows across the full request path
+#### Normal mode:
 
-### Accessing the Service
-
-Once the container is running, call:
-
-```text
+```code
 http://localhost:8000/start
 ``` 
 
-The `/start` endpoint:
+#### Chaos mode:
 
-- Creates an initial span in the frontend
-- Sends a traced HTTP request to the backend
-- Produces a unified distributed trace visible in Jaeger, Tempo, or any OTLP‑compatible backend
+```code
+http://localhost:8000/start?chaos=true
+```
 
----
-
-## Dockerfile Overview
-
-This service uses a simple Dockerfile that:
-
-- Sets the working directory
-- Installs dependencies
-- Copies the application source
-- Starts Uvicorn on `0.0.0.0:8000`
+Chaos mode is optional and defaults to false when the query parameter is omitted.
 
 ---
 
-## Contributing
+## Example Traces
 
-To contribute to the development of the frontend-service:
+### Normal Request
 
-1. Fork frontend-service from https://github.com/davidfifer/davidfifer-portfolio/fork
-2. Create your feature branch (`git checkout -b feature-new`)
-3. Make your changes
-4. Commit your changes (`git commit -am 'Add new feature'`)
-5. Push to the branch (`git push origin feature-new`)
-6. Open a pull request
+- Clean hierarchy
+- No errors
+- No chaos attributes
+- Fast response
 
----
+### Chaos Request
 
-## Contributors
-
-A huge thank you to everyone who has put their time and effort into improving this project.
-
-| **Name**              | **GitHub**                                                            | **Contributions**                  |
-|-----------------------|-----------------------------------------------------------------------|------------------------------------|
-| **David Fifer**       | [@davidfifer](https://github.com/davidfifer)                          | Creator, architect, and maintainer |
-| **Community Members** | [Open a PR](https://github.com/davidfifer/davidfifer-portfolio/pulls) | Features, fixes, feedback          |
-
-If you’d like to contribute, check out the [Contributing](#contributing) and submit a pull request.
-
----
-
-## Author
-
-David Fifer – [@AuthorLinkedIn](https://www.linkedin.com/in/david-b-fifer) – davidfifer47@gmail.com
-
----
-
-## Change Log
-
-- 0.0.1
-    * First working version
-
----
-
-## License
-
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-Licensed under the MIT License. See [LICENSE](LICENSE) for full terms.
+- Longer spans
+- latency.injected_ms present
+- Worker failure → red spans
+- Error propagation visible across services

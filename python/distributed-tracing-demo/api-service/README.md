@@ -1,43 +1,123 @@
 # API Service
 
-A lightweight FastAPI application packaged in a Docker container and served using Uvicorn. The service exposes an API
-defined in `src/main.py` and runs on port 8000. It includes a simple health‑check endpoint that returns a basic status
-message, making it easy to confirm the service is up and running.
+The API Service is the second hop in the distributed‑tracing demo. It receives traced requests from the frontend,
+creates additional spans, injects latency when chaos mode is enabled, and forwards work to the worker service. With
+automated OpenTelemetry instrumentation and manually defined spans, the API provides a clear view of how trace context
+is enriched as it moves deeper into the system.
+
+This service demonstrates:
+
+- How mid‑tier services participate in distributed traces
+- How manual spans clarify service‑level behavior
+- How latency injection affects downstream spans
+- How errors propagate from the worker back through the API
+- How Jaeger visualizes multi‑service trace hierarchies
 
 ---
 
 ## Overview
 
-The API Service is a minimal FastAPI application intended for use in containerized environments or as a foundational
-building block for larger systems. It provides a straightforward example of how to structure a FastAPI project, package
-it with Docker, and run it using Uvicorn.
+The API Service is a FastAPI application that:
 
-This service is intentionally simple—ideal for demos, scaffolding new microservices, or validating infrastructure setups.
+- Accepts a traced request at `/process`
+- Creates a manual span (`api.process`)
+- Injects latency when chaos mode is enabled
+- Calls the worker service using a traced outbound HTTP request
+- Adds attributes describing chaos behavior
+- Emits telemetry to the OpenTelemetry Collector
 
----
-
-## Table of Contents
-
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Running with Docker](#running-with-docker)
-- [Dockerfile Overview](#dockerfile-overview)
-- [Contributing](#contributing)
-- [Contributors](#contributors)
-- [Author](#author)
-- [Change Log](#change-log)
-- [License](#license)
+All tracing is exported via OTLP and can be visualized in Jaeger, Tempo, or any OTLP‑compatible backend.
 
 ---
 
 ## Features
 
-- FastAPI application structure
+- FastAPI application
 - Uvicorn ASGI server
+- Automated OpenTelemetry instrumentation
+    - FastAPI inbound request spans
+    - Requests outbound HTTP spans
+- Manual spans for clarity
+    - `api.process`
+    - `api.call_worker`
+- Chaos‑mode latency injection
+- Error propagation from worker → API → frontend
+- OTLP exporter to OpenTelemetry Collector
 - Dockerized environment using `python:3.11-slim`
-- Dependency installation via `requirements.txt`
-- Simple health‑check endpoint
+
+---
+
+## Table of Contents
+
+- [Tracing Behavior](#tracing-behavior)
+- [Chaos Mode](#chaos-mode)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Running with Docker](#running-with-docker)
+- [Example Traces](#example-traces)
+
+---
+
+## Tracing Behavior
+
+### Automated Instrumentation
+
+The API automatically emits spans for:
+
+- Inbound HTTP requests (GET `/process`)
+- Outbound HTTP calls to the worker service
+
+These spans include:
+
+- HTTP method
+- URL
+- Status code
+- Timing information
+- Trace context propagation headers
+
+### Manual Spans
+
+Two manual spans provide semantic clarity:
+- `api.process` - wraps the entire `/process` handler
+- `api.call_worker` - wraps the outbound call to the worker service
+
+These spans make the trace hierarchy easier to interpret in Jaeger.
+
+### Trace Hierarchy (Normal Mode)
+
+```code
+frontend.start
+    frontend.call_api
+        api.process
+            api.call_worker
+                worker.work
+```
+
+---
+
+## Chaos Mode
+
+Chaos mode introduces:
+
+- Random latency (`latency.injected_ms`)
+- Error propagation when the worker fails
+- Additional attributes describing chaos behavior
+- Red spans in Jaeger when failures occur
+
+When chaos is enabled:
+
+```code
+http://localhost:8001/process?chaos=true
+```
+
+You may see:
+
+- `chaos.enabled = true`
+- `latency.injected_ms = <value>`
+- `error = true`
+- `otel.status_code = ERROR`
+
+Chaos mode is optional and defaults to false when the query parameter is omitted.
 
 ---
 
@@ -58,12 +138,18 @@ This service is intentionally simple—ideal for demos, scaffolding new microser
 ## Prerequisites
 
 - Docker installed
-- Port 8000 available
-- Python 3.11 (optional, for running locally without Docker)
+- Frontend service running
+- Worker service running
+- OpenTelemetry Collector accepting OTLP traces
 
 ---
 
 ## Running with Docker
+
+### Required Environment Variables
+
+- `OTEL_EXPORTER_OTLP_ENDPOINT` – OTLP HTTP endpoint of your OpenTelemetry Collector
+- `WORKER_URL` - URL of the worker service
 
 ### Build the Image
 
@@ -74,73 +160,40 @@ docker build -t api-service .
 ### Run the Container
 
 ```bash
-docker run -d -p 8000:8000 api-service
+docker run -p 8001:8000 \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318/v1/traces \
+  -e WORKER_URL=http://worker-service:8002 \
+  api-service
 ```
 
-### Accessing the Service
+### Access the Service
 
-Once running, access the root endpoint:
+#### Normal mode:
 
-```text
-http://localhost:8000
+```code
+http://localhost:8001/process
 ```
 
-The service will respond with a simple health‑check message confirming it is up and running.
+#### Chaos mode:
+
+```code
+http://localhost:8001/process?chaos=true
+```
 
 ---
 
-## Dockerfile Overview
+## Example Traces
 
-This service uses a simple Dockerfile that:
+### Normal Request
 
-- Sets the working directory
-- Installs dependencies from `requirements.txt`
-- Copies the application source
-- Starts Uvicorn on `0.0.0.0:8000`
+- Clean hierarchy
+- No errors
+- No chaos attributes
+- Moderate latency (worker call + API processing)
 
----
+### Chaos Request
 
-## Contributing
-
-To contribute to the development of api-service:
-
-1. Fork api-service from https://github.com/davidfifer/davidfifer-portfolio/fork
-2. Create your feature branch (`git checkout -b feature-new`)
-3. Make your changes
-4. Commit your changes (`git commit -am 'Add new feature'`)
-5. Push to the branch (`git push origin feature-new`)
-6. Open a pull request
-
----
-
-## Contributors
-
-A huge thank you to everyone who has put their time and effort into improving this project.
-
-| **Name**              | **GitHub**                                                            | **Contributions**                  |
-|-----------------------|-----------------------------------------------------------------------|------------------------------------|
-| **David Fifer**       | [@davidfifer](https://github.com/davidfifer)                          | Creator, architect, and maintainer |
-| **Community Members** | [Open a PR](https://github.com/davidfifer/davidfifer-portfolio/pulls) | Features, fixes, feedback          |
-
-If you’d like to contribute, check out the [Contributing](#contributing) and submit a pull request.
-
----
-
-## Author
-
-David Fifer – [@AuthorLinkedIn](https://www.linkedin.com/in/david-b-fifer) – davidfifer47@gmail.com
-
----
-
-## Change Log
-
-### 0.0.1
-- Initial working version
-
----
-
-## License
-
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-Licensed under the MIT License. See [LICENSE](LICENSE) for full terms.
+- Longer spans
+- `latency.injected_ms` present
+- Worker failure → red spans
+- Error propagation visible across services

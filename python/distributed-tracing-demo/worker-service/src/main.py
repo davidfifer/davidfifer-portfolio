@@ -22,14 +22,28 @@ app = FastAPI()
 
 FastAPIInstrumentor().instrument_app(app, tracer_provider=provider)
 
+# Manual tracer
+tracer = trace.get_tracer("worker-service")
+
+
 @app.get("/work")
 def work(chaos: bool = False):
-    # Slowdown only when chaos is enabled
-    if chaos and random.random() < 0.2:
-        time.sleep(1.5)
 
-    # Failure only when chaos is enabled
-    if chaos and random.random() < 0.1:
-        raise HTTPException(status_code=500, detail="Simulated worker failure")
+    # --- Manual root span for worker service ---
+    with tracer.start_as_current_span("worker.work") as span:
+        span.set_attribute("chaos.enabled", chaos)
 
-    return {"status": "ok", "chaos": chaos}
+        # --- Chaos-mode slowdown ---
+        if chaos and random.random() < 0.2:
+            injected = 1.5
+            span.set_attribute("latency.injected_ms", injected * 1000)
+            time.sleep(injected)
+
+        # --- Chaos-mode failure ---
+        if chaos and random.random() < 0.1:
+            error_msg = "Simulated worker failure"
+            span.record_exception(Exception(error_msg))
+            span.set_attribute("error", True)
+            raise HTTPException(status_code=500, detail=error_msg)
+
+        return {"status": "ok", "chaos": chaos}

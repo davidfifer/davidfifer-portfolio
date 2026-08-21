@@ -25,19 +25,37 @@ app = FastAPI()
 FastAPIInstrumentor().instrument_app(app, tracer_provider=provider)
 RequestsInstrumentor().instrument(tracer_provider=provider)
 
+tracer = trace.get_tracer("api-service")
+
+
 @app.get("/process")
 def process(chaos: bool = False):
-    # Latency injection only when chaos is enabled
-    if chaos:
-        time.sleep(random.uniform(0.1, 0.5))
 
-    try:
-        resp = requests.get(
-            "http://worker-service:8000/work",
-            params={"chaos": chaos}
-        )
-        resp.raise_for_status()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Worker error: {str(e)}")
+    # --- Root span for api service ---
+    with tracer.start_as_current_span("api.process") as span:
+        span.set_attribute("chaos.enabled", chaos)
 
-    return {"worker_response": resp.json(), "chaos": chaos}
+        # --- Chaos-mode latency injection ---
+        if chaos:
+            injected = random.uniform(0.1, 0.5)
+            span.set_attribute("latency.injected_ms", injected * 1000)
+            time.sleep(injected)
+
+        try:
+            # --- Child span for worker call ---
+            with tracer.start_as_current_span("api.call_worker") as worker_span:
+                worker_span.set_attribute("worker.url", "http://worker-service:8000/work")
+                worker_span.set_attribute("chaos.enabled", chaos)
+
+                resp = requests.get(
+                    "http://worker-service:8000/work",
+                    params={"chaos": chaos}
+                )
+                resp.raise_for_status()
+
+        except Exception as e:
+            worker_span.record_exception(e)
+            worker_span.set_attribute("error", True)
+            raise HTTPException(status_code=500, detail=f"Worker error: {str(e)}")
+
+        return {"worker_response": resp.json(), "chaos": chaos}
