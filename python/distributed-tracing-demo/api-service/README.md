@@ -44,13 +44,22 @@ All tracing is exported via OTLP and can be visualized in Jaeger, Tempo, or any 
 - Error propagation from worker → API → frontend
 - OTLP exporter to OpenTelemetry Collector
 - Dockerized environment using `python:3.11-slim`
+- **Prometheus metrics**
+  - `api_chaos_requests_total`
+  - `worker_retry_total`
+- **Retry logic with backoff**
+- **Additional span attributes** (`retry.*`, `worker.url`, `latency.injected_ms`)
+- **Lifespan hooks for startup/shutdown**
 
 ---
 
 ## Table of Contents
 
 - [Tracing Behavior](#tracing-behavior)
+- [Retry Logic](#retry-logic)
 - [Chaos Mode](#chaos-mode)
+- [Metrics](#metrics)
+- [Telemetry Export](#telemetry-export)
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Running with Docker](#running-with-docker)
@@ -83,6 +92,18 @@ Two manual spans provide semantic clarity:
 
 These spans make the trace hierarchy easier to interpret in Jaeger.
 
+### Retry Spans
+
+When retries occur, **multiple** `api.call_worker` **spans** appear in the trace - one per attempt.
+Each span includes:
+
+- `retry.attempt`
+- `retry.success`
+- `retry.backoff_ms`
+- `worker.url`
+
+This makes retry behavior visible directly in Jaeger.
+
 ### Trace Hierarchy (Normal Mode)
 
 ```code
@@ -95,6 +116,25 @@ frontend.start
 
 ---
 
+## Retry Logic
+
+The API service includes a retry loop when calling the worker service:
+
+- Up to **3 attempts** (`MAX_RETRIES`)
+- **Linear backoff** (`BASE_BACKOFF * attempt`)
+- Each attempt creates its own `api.call_worker` span
+- Failures increment the `worker_retry_total` Prometheus counter
+
+If all retries fail, the API returns:
+
+```text
+HTTP 500 — Worker failed after retries
+```
+
+Retry metadata is visible in traces and metrics.
+
+---
+
 ## Chaos Mode
 
 Chaos mode introduces:
@@ -103,6 +143,7 @@ Chaos mode introduces:
 - Error propagation when the worker fails
 - Additional attributes describing chaos behavior
 - Red spans in Jaeger when failures occur
+- Increments the `api_chaos_requests_total` Prometheus counter
 
 When chaos is enabled:
 
@@ -117,7 +158,50 @@ You may see:
 - `error = true`
 - `otel.status_code = ERROR`
 
+Chaos mode may also trigger **worker retries**, producing multiple `api.call_worker` spans.
+
 Chaos mode is optional and defaults to false when the query parameter is omitted.
+
+---
+
+## Metrics
+
+The API service exposes Prometheus metrics via `prometheus_fastapi_instrumentator`:
+
+- `api_chaos_requests_total` - number of chaos-enabled requests
+- `worker_retry_total` - number of worker retry attempts
+- Default FastAPI metrics (latency, request count, exceptions)
+
+Metrics are available at:
+
+```code
+http://localhost:8001/metrics
+```
+
+### Prometheus Scraping Example
+
+```yaml
+scrape_configs:
+  - job_name: 'api-service'
+    static_configs:
+      - targets: ['localhost:8001']
+```
+
+---
+
+## Telemetry Export
+
+Traces are exported to the OpenTelemetry Collector using OTLP/HTTP:
+
+```code
+OTLPSpanExporter(endpoint="http://otel-collector:4318/v1/traces")
+```
+
+This allows visualization in:
+
+- Jaeger
+- Tempo
+- Any OTLP‑compatible backend
 
 ---
 

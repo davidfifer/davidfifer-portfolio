@@ -22,9 +22,11 @@ The Frontend Service is a lightweight FastAPI application that:
 - Accepts a request at `/start`
 - Creates a manual span (`frontend.start`)
 - Calls the API service using a traced outbound HTTP request
+- Adds attributes describing chaos behavior
 - Emits telemetry to the OpenTelemetry Collector
 - Participates in chaos mode when enabled
-- All tracing is exported via OTLP and can be visualized...
+
+All tracing is exported via OTLP and can be visualized in Jaeger, Tempo, or any OTLP‑compatible backend.
 
 ---
 
@@ -41,6 +43,14 @@ The Frontend Service is a lightweight FastAPI application that:
 - Chaos‑mode latency + error injection
 - OTLP exporter to OpenTelemetry Collector
 - Dockerized environment using `python:3.11-slim`
+- **Prometheus metrics**
+  - `frontend_chaos_requests_total` 
+- **Additional span attributes**
+  - `api.url`
+  - `chaos.enabled`
+  - `latency.injected_ms`
+  - `error`
+- Lifespan hooks for startup/shutdown
 
 ---
 
@@ -48,6 +58,8 @@ The Frontend Service is a lightweight FastAPI application that:
 
 - [Tracing Behavior](#tracing-behavior)
 - [Chaos Mode](#chaos-mode)
+- [Metrics](#metrics)
+- [Telemetry Export](#telemetry-export)
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Running with Docker](#running-with-docker)
@@ -98,13 +110,13 @@ frontend.start
 Chaos mode introduces:
 
 - Random latency (`latency.injected_ms`)
-- Random worker failures
 - Error propagation across services
 - Red spans in Jaeger when failures occur
+- Increments the `frontend_chaos_requests_total` Prometheus counter
 
 When chaos is enabled:
 
-```code
+```code 
 http://localhost:8000/start?chaos=true
 ```
 
@@ -116,6 +128,46 @@ You may see:
 - `otel.status_code = ERROR`
 
 Chaos mode is essential for demonstrating how distributed traces behave under failure conditions.
+
+---
+
+## Metrics
+
+The frontend exposes Prometheus metrics via `prometheus_fastapi_instrumentator`:
+
+- `frontend_chaos_requests_total` - number of chaos-enabled requests
+- Default FastAPI metrics (latency, request count, exceptions)
+
+Metrics are available at:
+
+```code
+http://localhost:8000/metrics
+```
+
+### Prometheus Scraping Example
+
+```yaml
+scrape_configs:
+  - job_name: 'frontend-service'
+    static_configs:
+      - targets: ['localhost:8000']
+```
+
+---
+
+## Telemetry Export
+
+Traces are exported to the OpenTelemetry Collector using OTLP/HTTP:
+
+```code
+OTLPSpanExporter(endpoint="http://otel-collector:4318/v1/traces")
+``` 
+
+This allows visualization in:
+
+- Jaeger
+- Tempo
+- Any OTLP‑compatible backend
 
 ---
 
@@ -194,6 +246,6 @@ Chaos mode is optional and defaults to false when the query parameter is omitted
 ### Chaos Request
 
 - Longer spans
-- latency.injected_ms present
+- `latency.injected_ms` present
 - Worker failure → red spans
 - Error propagation visible across services

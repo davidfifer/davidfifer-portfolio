@@ -10,6 +10,7 @@ This service demonstrates:
 - How downstream services contribute to distributed traces
 - How manual spans clarify worker‑level behavior
 - How latency and failures affect upstream spans
+- How queue depth and wait time influence trace timing
 - How error propagation appears in Jaeger
 - How chaos mode simulates real‑world instability
 
@@ -23,6 +24,7 @@ The Worker Service is a FastAPI application that:
 - Creates a manual span (`worker.work`)
 - Injects latency when chaos mode is enabled
 - Randomly raises failures to simulate instability
+- Simulates queue depth and queue wait time
 - Emits telemetry to the OpenTelemetry Collector
 
 All tracing is exported via OTLP and can be visualized in Jaeger, Tempo, or any OTLP‑compatible backend.
@@ -39,9 +41,21 @@ All tracing is exported via OTLP and can be visualized in Jaeger, Tempo, or any 
   - `worker.work`
 - Chaos‑mode latency injection
 - Chaos‑mode random failures
+- Queue depth + queue wait simulation
 - Error propagation to API → frontend
 - OTLP exporter to OpenTelemetry Collector
 - Dockerized environment using `python:3.11-slim`
+- **Prometheus metrics**
+  - `worker_chaos_requests_total`
+  - `worker_queue_wait_seconds` (Histogram)
+- **Additional span attributes**
+  - `chaos.enabled`
+  - `latency.injected_ms`
+  - `error`
+  - `queue.depth`
+  - `queue.wait_ms`
+
+- **Lifespan hooks for startup/shutdown**
 
 ---
 
@@ -49,6 +63,9 @@ All tracing is exported via OTLP and can be visualized in Jaeger, Tempo, or any 
 
 - [Tracing Behavior](#tracing-behavior)
 - [Chaos Mode](#chaos-mode)
+- [Queue Simulation](#queue-simulation)
+- [Metrics](#metrics)
+- [Telemetry Export](#telemetry-export)
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Running with Docker](#running-with-docker)
@@ -99,6 +116,12 @@ Chaos mode introduces:
 - Random failures (`worker.failure = true`)
 - Error propagation upstream
 - Red spans in Jaeger when failures occur
+- Increments the `worker_chaos_requests_total` Prometheus counter
+
+Chaos behavior is probabilistic:
+
+- **20% chance** of injecting a 1.5s delay
+- **10% chance** of raising a simulated failure
 
 When chaos is enabled:
 
@@ -114,6 +137,65 @@ You may see:
 - `otel.status_code = ERROR`
 
 Chaos mode is optional and defaults to false when the query parameter is omitted.
+
+---
+
+## Queue Simulation
+
+The worker simulates queueing behavior to demonstrate how downstream load affects trace timing.
+
+Each request includes:
+
+- A random queue depth (`queue.depth`) between **1** and **10**
+- A queue wait time (`queue.wait_ms`) based on depth × random factor
+- A Prometheus histogram observation (`worker_queue_wait_seconds`)
+
+These attributes appear directly in Jaeger and help visualize:
+
+- Load-induced latency
+- Downstream bottlenecks
+- Queueing effects on upstream spans
+
+---
+
+## Metrics
+
+The worker exposes Prometheus metrics via `prometheus_fastapi_instrumentator`:
+
+- `worker_chaos_requests_total` — number of chaos-enabled requests
+- `worker_queue_wait_seconds` — histogram of simulated queue wait time 
+- Default FastAPI metrics (latency, request count, exceptions)
+
+Metrics are available at:
+
+```code
+http://localhost:8002/metrics
+```
+
+### Prometheus Scraping Example
+
+```yaml
+scrape_configs:
+  - job_name: 'worker-service'
+    static_configs:
+      - targets: ['localhost:8002']
+```
+
+---
+
+## Telemetry Export
+
+Traces are exported to the OpenTelemetry Collector using OTLP/HTTP:
+
+```code
+OTLPSpanExporter(endpoint="http://otel-collector:4318/v1/traces")
+```
+
+This allows visualization in:
+
+- Jaeger
+- Tempo
+- Any OTLP‑compatible backend
 
 ---
 
@@ -184,11 +266,13 @@ http://localhost:8002/work?chaos=true
 - Clean hierarchy
 - No errors
 - No chaos attributes
+- Queue depth + wait time visible
 - Fast response
 
 ### Chaos Request
 
 - Longer spans
 - `latency.injected_ms` present
+- `queue.depth` and `queue.wait_ms` present
 - Worker failure → red spans
 - Error propagation visible across API → frontend
