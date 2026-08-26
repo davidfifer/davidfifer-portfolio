@@ -111,8 +111,8 @@ The fastest way to run the full distributed tracing environment:
 1. Clone the repository
 
 ```bash
-git clone https://github.com/davidfifer/distributed-tracing-demo.git
-cd distributed-tracing-demo
+git clone https://github.com/davidfifer/distributed_tracing_demo.git
+cd distributed_tracing_demo
 ```
 
 2. Start all services
@@ -271,7 +271,7 @@ Chaos mode simulates real-world instability across all services.
 <summary><strong>Click to expand project structure diagram</strong></summary>
 
 ```text
-distributed-tracing-demo/
+distributed_tracing_demo/
 │
 ├── frontend-service/
 │   ├── src/main.py
