@@ -1,92 +1,111 @@
-# ============================
-# Global ignores
-# ============================
-
-# OS junk
+############################
+# OS Junk
+############################
 .DS_Store
 Thumbs.db
 
-# Editor / IDE
+############################
+# Git
+############################
+.gitignore
+.gitmodules
+
+############################
+# IDE / Editor Files
+############################
+
+# IntelliJ IDEA / PyCharm
 .idea/
+*.iml
+*.iws
+*.ipr
+
+# VS Code
 .vscode/
-*.swp
 
-# ============================
-# Java / Maven / Spring Boot
-# ============================
+# Eclipse / STS
+.project
+.classpath
+.settings/
+.springBeans
+.sts4-cache
+.apt_generated
+.factorypath
 
-# Maven target directory
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+############################
+# Python
+############################
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+.eggs/
+venv/
+.venv/
+env/
+ENV/
+
+############################
+# Java / Maven / Gradle
+############################
 target/
-
-# Build artifacts
+build/
+out/
 *.class
 *.jar
 *.war
 *.ear
 
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# Gradle
+.gradle/
+gradle-app.setting
+gradle-wrapper.jar
+gradle-wrapper.properties
+
+############################
 # Logs
+############################
 *.log
+logs/
 
-# Spring Boot DevTools
-spring-devtools.properties
-
-# ============================
-# Python
-# ============================
-
-# Virtual environments
-venv/
-.env/
-.envrc
-
-# Bytecode
-__pycache__/
-*.pyc
-*.pyo
-
-# Packaging
-build/
-dist/
-*.egg-info/
-
-# ============================
-# Node / Frontend (future-proof)
-# ============================
-
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# ============================
+############################
 # Docker
-# ============================
+############################
+.env
+.env.docker
+docker-data/
+docker-compose.override.yml
 
-# Local Docker artifacts
-*.pid
-*.seed
-*.pid.lock
+############################
+# Secrets
+############################
+*.env
+*.key
+*.pem
+*.crt
 
-# ============================
-# IntelliJ / PyCharm (project-level)
-# ============================
+############################
+# Temporary Files
+############################
+*.tmp
+*.swp
+*.swo
 
-# Allow subproject-level IntelliJ configs if needed
-!java/**/.idea/
-!python/**/.idea/
-
-# But ignore noisy IntelliJ files everywhere
-**/.idea/workspace.xml
-**/.idea/shelf/
-**/.idea/dataSources/
-**/.idea/httpRequests/
-**/.idea/dictionaries/
-**/*.iml
-
-# ============================
-# Misc
-# ============================
-
-# Temporary files
-tmp/
-.cache/
+############################
+# Java Tooling
+############################
+hs_err_pid*
+replay_pid*
