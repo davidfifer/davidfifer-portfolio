@@ -1,5 +1,5 @@
 rate-limits:
-  default:
+  defaultLimit:
     capacity: 10
     refillRate: 5
 

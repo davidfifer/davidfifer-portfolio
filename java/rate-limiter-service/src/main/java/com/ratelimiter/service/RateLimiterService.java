@@ -2,6 +2,7 @@ package com.ratelimiter.service;
 
 import com.ratelimiter.config.RateLimitProperties;
 import com.ratelimiter.dto.RateLimitResponse;
+import com.ratelimiter.model.TokenBucket;
 import com.ratelimiter.store.TokenBucketStore;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,8 @@ public class RateLimiterService {
     }
 
     public RateLimitResponse checkRateLimit(String apiKey) {
-        return null; // placeholder
+        TokenBucket bucket = bucketStore.getOrCreateBucket(apiKey);
+        boolean allowed = bucket.tryConsume();
+        return new RateLimitResponse(allowed, bucket.getTokens());
     }
 }
