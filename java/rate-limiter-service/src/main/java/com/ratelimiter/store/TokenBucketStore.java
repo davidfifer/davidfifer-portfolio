@@ -5,17 +5,18 @@ import com.ratelimiter.model.TokenBucket;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TokenBucketStore {
-    private int capacity;
-    private int refillRate;
 
+    private final RateLimitProperties properties;
     private final ConcurrentHashMap<String, TokenBucket> buckets = new ConcurrentHashMap<>();
 
     public TokenBucketStore(RateLimitProperties properties) {
-        this.capacity = properties.getDefaultLimit().getCapacity();
-        this.refillRate = properties.getDefaultLimit().getRefillRate();
+        this.properties = properties;
     }
 
     public TokenBucket getOrCreateBucket(String apiKey) {
-        return buckets.computeIfAbsent(apiKey, key -> new TokenBucket(capacity, refillRate));
+        return buckets.computeIfAbsent(apiKey, key -> {
+            RateLimitProperties.Limit limit = properties.getLimitFor(apiKey);
+            return new TokenBucket(limit.getCapacity(), limit.getRefillRate());
+        });
     }
 }

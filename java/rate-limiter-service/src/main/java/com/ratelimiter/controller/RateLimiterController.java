@@ -20,6 +20,12 @@ public class RateLimiterController {
 
     @PostMapping
     public RateLimitResponse checkRateLimit(@RequestBody RateLimitRequest request) {
-        return null; // placeholder
+        String apiKey = request.getApiKey();
+
+        if (apiKey == null || apiKey.isBlank()) {
+            return new RateLimitResponse(false, 0);
+        }
+
+        return rateLimiterService.checkRateLimit(apiKey);
     }
 }
