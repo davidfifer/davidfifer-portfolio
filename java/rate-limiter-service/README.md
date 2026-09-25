@@ -106,19 +106,15 @@ These can be overridden using environment variables or mounted config files when
 Below is a minimal configuration showing default limits and per‑key overrides:
 
 ```yaml
-rate-limiter:
-  default:
+rate-limits:
+  default-limit:
     capacity: 10
-    refillRate: 5
+    refill-rate: 5
 
-  keys:
+  api-keys:
     user123:
-      capacity: 5
-      refillRate: 2
-
-    premiumUser:
       capacity: 20
-      refillRate: 10
+      refill-rate: 10
 ```
 
 ---
