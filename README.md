@@ -18,10 +18,10 @@
 <img src="https://img.shields.io/badge/License-MIT-green.svg" />
 </p>
 
-A curated collection of backend engineering, reliability-focused, automation, and data-processing projects built to
-demonstrate clean architecture, modern tooling, and production‑grade development practices.
-This repository serves as a unified portfolio showcasing work across Java, Spring Boot, Python, FastAPI microservices,
-distributed tracing, observability tooling, CLI utilities, data cleaning pipelines, and Dockerized services.
+A curated collection of backend engineering, reliability-focused, automation, data-processing, and algorithmic systems
+projects built to demonstrate clean architecture, modern tooling, and production‑grade development practices. This
+repository serves as a unified portfolio showcasing work across Java, Spring Boot, Python, FastAPI microservices,
+distributed tracing, observability tooling, CLI utilities, data cleaning pipelines, rate limiting,and Dockerized services.
 
 Each project is designed to be practical, configurable, and easy to run, reflecting real-world engineering patterns such
 as declarative configuration, layered architecture, strict validation, automated workflows, and end-to-end observability.
@@ -29,6 +29,34 @@ as declarative configuration, layered architecture, strict validation, automated
 ---
 
 ## Projects
+
+### Rate Limiter Service - Spring Boot + Token Bucket + Docker
+
+A production‑style rate‑limiting microservice implementing the token bucket algorithm, built with clean layered
+architecture, config‑driven limits, concurrency‑safe bucket storage, and full unit test coverage. Designed to
+demonstrate real backend engineering patterns beyond CRUD.
+
+#### Key capabilities:
+
+- Token bucket algorithm (capacity, refill rate, timing logic)
+- Thread‑safe bucket store using ConcurrentHashMap
+- Config‑driven per‑key rate limits (YAML)
+- `/check` REST endpoint for rate‑limit evaluation
+- JUnit tests validating refill timing, consumption, and edge cases
+- Dockerized service with example curl commands
+- Architecture diagram (Mermaid/ASCII)
+- Structured logging with request correlation
+
+#### Demonstrates:
+
+- Concurrency correctness
+- Algorithmic backend engineering
+- Declarative configuration
+- Layered architecture
+- Timing‑based unit testing
+- Production‑grade Dockerization
+
+---
 
 ### Notes API - Spring Boot + JWT + Docker
 
@@ -133,6 +161,8 @@ Each project is self‑contained with its own README, installation instructions,
 - Automation workflows
 - Distributed tracing
 - Prometheus metrics
+- Concurrency-safe design (ConcurrentHashMap, timing logic)
+- Token bucket rate limiting algorithm
 
 ---
 
@@ -142,12 +172,14 @@ Each project is self‑contained with its own README, installation instructions,
 davidfifer-portfolio/
 │
 ├── java/
-│   └── notesapi/                   # Spring Boot + JWT + Docker Notes API
+│   ├── notesapi/                   # Spring Boot + JWT + Docker Notes API
+│   └── rate_limiter_service/       # Spring Boot + Token Bucket + Docker
 │
 ├── python/
 │   ├── csv_data_cleaner/           # CSV Cleaning Utility (Typer + pandas)
 │   ├── file_organizer/             # File Sorting Utility (argparse + JSON config)
 │   └── distributed_tracing_demo/   # FastAPI + OpenTelemetry + Jaeger + Prometheus
+
 ```
 
 ---
