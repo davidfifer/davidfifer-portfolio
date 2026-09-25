@@ -1,0 +1,9 @@
+rate-limits:
+  default-limit:
+    capacity: 10
+    refill-rate: 5
+
+  api-keys:
+    user123:
+      capacity: 20
+      refill-rate: 10

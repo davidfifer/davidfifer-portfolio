@@ -1,6 +1,7 @@
 package com.ratelimiter.dto;
 
 public class RateLimitResponse {
+
     private boolean allowed;
     private double remainingTokens;
 

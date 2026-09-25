@@ -2,8 +2,11 @@ package com.ratelimiter.store;
 
 import com.ratelimiter.config.RateLimitProperties;
 import com.ratelimiter.model.TokenBucket;
+import org.springframework.stereotype.Service;
+
 import java.util.concurrent.ConcurrentHashMap;
 
+@Service
 public class TokenBucketStore {
 
     private final RateLimitProperties properties;

@@ -43,5 +43,4 @@ public class TokenBucket {
     public double getTokens() {
         return tokens;
     }
-
 }

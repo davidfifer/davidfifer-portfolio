@@ -1,6 +1,7 @@
 package com.ratelimiter.dto;
 
 public class RateLimitRequest {
+
     private String apiKey;
 
     public String getApiKey() {

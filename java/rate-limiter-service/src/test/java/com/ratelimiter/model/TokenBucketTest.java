@@ -21,7 +21,7 @@ class TokenBucketTest {
     }
 
     @Test
-    void refillCapsAtCapacityBeforeConsumption() throws InterruptedException {
+    void refillDoesNotExceedCapacity() throws InterruptedException {
         TokenBucket bucket = new TokenBucket(5, 100); // refills very fast
         bucket.tryConsume(); // 4 left
 
@@ -32,7 +32,7 @@ class TokenBucketTest {
     }
 
     @Test
-    void refillAddsCorrectAmountBasedOnTime() throws InterruptedException {
+    void refillBasedOnElapsedTime() throws InterruptedException {
         TokenBucket bucket = new TokenBucket(10, 2); // 2 tokens/sec
         bucket.tryConsume(); // 9 left
 
