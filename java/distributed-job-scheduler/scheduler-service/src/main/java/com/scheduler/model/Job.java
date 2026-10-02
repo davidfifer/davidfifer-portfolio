@@ -21,7 +21,10 @@ public class Job {
     private int attempts;
     private int maxAttempts;
 
+    @Column(name = "next_run_at")
     private Instant nextRunAt;
+
+    @Column(name = "created_at")
     private Instant createdAt;
 
     public UUID getId() {
