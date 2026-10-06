@@ -20,14 +20,26 @@ public class JobPoller {
     @Scheduled(fixedDelay = 1000)
     public void poll() {
         logger.info("Polling for jobs...");
-        Job job =  workerService.claimNextJob();
+        boolean keepPolling = true;
 
-        if (job == null) {
-            logger.info("No runnable jobs found");
-            return;
+        try {
+            while (keepPolling) {
+                Job job =  workerService.claimNextJob();
+
+                if (job == null) {
+                    logger.info("No runnable jobs found");
+                    Thread.sleep(1000);
+                    return;
+                }
+
+                logger.info("Executing job id={}", job.getId());
+                workerService.execute(job);
+                keepPolling = false;
+            }
+        } catch (InterruptedException e) {
+            logger.error("Pooling loop interrupted: {}", e.getMessage());
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
         }
-
-        logger.info("Executing job id={}", job.getId());
-        workerService.execute(job);
     }
 }

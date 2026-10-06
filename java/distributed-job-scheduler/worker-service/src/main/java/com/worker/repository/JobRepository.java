@@ -4,6 +4,7 @@ import com.worker.model.Job;
 import com.worker.model.JobStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -23,5 +24,8 @@ public interface JobRepository extends JpaRepository<Job, UUID> {
         """,
         nativeQuery = true
     )
-    Optional<Job> findNextRunnableJob(JobStatus status, Instant now);
+    Optional<Job> findNextRunnableJob(
+            @Param("status") JobStatus status,
+            @Param("now") Instant now
+    );
 }
