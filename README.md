@@ -1,7 +1,7 @@
 # David Fifer - Engineering Portfolio
 
 <p align="center">
-<img src="https://img.shields.io/badge/Java-21-ED8B00.svg?logo=openjdk&logoColor=white" />
+<img src="https://img.shields.io/badge/Java-17-ED8B00.svg?logo=openjdk&logoColor=white" />
 <img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white" />
 <img src="https://img.shields.io/badge/Spring%20Boot-3.0-6DB33F.svg?logo=springboot&logoColor=white" />
 <img src="https://img.shields.io/badge/FastAPI-Microservices-009688.svg?logo=fastapi&logoColor=white" />
@@ -16,12 +16,14 @@
 <img src="https://img.shields.io/badge/Data%20Engineering-blueviolet" />
 <img src="https://img.shields.io/badge/Automation-red" />
 <img src="https://img.shields.io/badge/License-MIT-green.svg" />
+<img src="https://img.shields.io/badge/Job-Distributed-blue.svg" />
 </p>
 
 A curated collection of backend engineering, reliability-focused, automation, data-processing, and algorithmic systems
 projects built to demonstrate clean architecture, modern tooling, and production‑grade development practices. This
 repository serves as a unified portfolio showcasing work across Java, Spring Boot, Python, FastAPI microservices,
-distributed tracing, observability tooling, CLI utilities, data cleaning pipelines, rate limiting,and Dockerized services.
+distributed tracing, observability tooling, distributed job scheduling, CLI utilities, data cleaning pipelines, rate
+limiting,and Dockerized services.
 
 Each project is designed to be practical, configurable, and easy to run, reflecting real-world engineering patterns such
 as declarative configuration, layered architecture, strict validation, automated workflows, and end-to-end observability.
@@ -29,6 +31,37 @@ as declarative configuration, layered architecture, strict validation, automated
 ---
 
 ## Projects
+
+### Distributed Job Scheduler - Spring Boot + PostgreSQL + Docker Compose
+
+A distributed job scheduling platform built with Spring Boot and PostgreSQL that demonstrates core backend and distributed systems concepts including job polling, concurrent worker execution, retry handling, scheduling logic, observability, and containerized deployment. Designed to showcase production-oriented patterns commonly found in workflow engines, task queues, and background processing systems.
+
+#### Key capabilities:
+
+- REST API for job submission and management
+- PostgreSQL-backed durable job storage
+- Scheduled worker polling for pending jobs
+- Job lifecycle tracking (PENDING, RUNNING, SUCCESS, FAILED)
+- Configurable retry handling with delayed re-execution
+- Concurrent job execution using thread pools
+- Health checks and readiness endpoints
+- Micrometer metrics for execution and failure tracking
+- Docker Compose orchestration
+- Structured logging for job lifecycle events
+- Example architecture and deployment documentation
+
+#### Demonstrates:
+
+- Distributed systems fundamentals
+- Background job processing patterns
+- Concurrent execution and thread management
+- Database-backed workflow coordination
+- Reliability engineering and retry strategies
+- Spring Boot scheduling and asynchronous processing
+- Observability and operational visibility
+- Containerized service deployment
+
+---
 
 ### Rate Limiter Service - Spring Boot + Token Bucket + Docker
 
@@ -137,12 +170,13 @@ brittle one‑off scripts.
 
 ### This portfolio is designed to showcase:
 
-- **Backend engineering expertise:** Spring Boot, JWT, layered architecture, PostgreSQL, Docker Compose.
-- **Reliability & observability:** Distributed tracing, Prometheus metrics, structured logging, chaos testing.
-- **Automation & tooling:** Python utilities, CLI design, configuration‑driven workflows.
+- **Backend engineering expertise:** Spring Boot, PostgreSQL, JWT, layered architecture, asynchronous processing, and Docker Compose.
+- **Reliability & observability:** Distributed tracing, Prometheus metrics, structured logging, health monitoring, retry handling, and chaos testing.
+- **Automation & tooling:** Python utilities, CLI design, configuration-driven workflows.
 - **Data engineering fundamentals:** Deterministic pipelines, validation, profiling, schema enforcement.
-- **Software craftsmanship:** Clean code, documentation, testing, error handling, cross‑platform support.
-- **Real‑world patterns:** Declarative configs, retry logic, logging pipelines, containerization.
+- **Distributed systems concepts:** Background job processing, workflow coordination, concurrent execution, scheduling, and fault-tolerant design.
+- **Software craftsmanship:** Clean code, documentation, testing, error handling, cross-platform support.
+- **Real-world patterns:** Declarative configuration, retry strategies, job scheduling, concurrent processing, logging pipelines, and containerization.
 
 Each project is self‑contained with its own README, installation instructions, architecture notes, and roadmap.
 
@@ -150,18 +184,24 @@ Each project is self‑contained with its own README, installation instructions,
 
 ## Technologies Demonstrated
 
-- Java 21, Spring Boot 3, Spring Security, JWT
-- Python 3.10+, pandas, Typer, argparse
-- Docker & Docker Compose
+- Java 17, Spring Boot 3, Spring Security, JWT
 - PostgreSQL 15
-- YAML/JSON configuration systems
-- Logging pipelines
-- Unit testing (JUnit 5, Mockito)
-- CLI tooling
-- Automation workflows
+- Docker & Docker Compose
+- Spring Scheduling
+- Concurrent job execution
+- Distributed workflow processing
+- Retry and failure handling patterns
+- Micrometer metrics
+- Health checks and service monitoring
 - Distributed tracing
 - Prometheus metrics
-- Concurrency-safe design (ConcurrentHashMap, timing logic)
+- OpenTelemetry & Jaeger
+- YAML/JSON configuration systems
+- Unit testing (JUnit 5, Mockito)
+- Logging pipelines
+- CLI tooling
+- Automation workflows
+- Concurrency-safe design
 - Token bucket rate limiting algorithm
 
 ---
@@ -172,6 +212,7 @@ Each project is self‑contained with its own README, installation instructions,
 davidfifer-portfolio/
 │
 ├── java/
+│   ├── distributed-job-scheduler/  # Spring Boot + PostgreSQL + Docker Compose
 │   ├── notesapi/                   # Spring Boot + JWT + Docker Notes API
 │   └── rate_limiter_service/       # Spring Boot + Token Bucket + Docker
 │
@@ -179,7 +220,6 @@ davidfifer-portfolio/
 │   ├── csv_data_cleaner/           # CSV Cleaning Utility (Typer + pandas)
 │   ├── file_organizer/             # File Sorting Utility (argparse + JSON config)
 │   └── distributed_tracing_demo/   # FastAPI + OpenTelemetry + Jaeger + Prometheus
-
 ```
 
 ---
