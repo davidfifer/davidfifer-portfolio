@@ -1,6 +1,7 @@
 package com.worker.service;
 
 import com.worker.executor.WorkExecutor;
+import com.worker.metrics.JobMetrics;
 import com.worker.model.Job;
 import com.worker.model.JobStatus;
 import com.worker.repository.JobRepository;
@@ -14,14 +15,16 @@ import java.util.UUID;
 @Service
 public class WorkerService {
 
+    private final JobMetrics jobMetrics;
     private final JobRepository jobRepository;
     private final WorkExecutor workExecutor;
 
     private static final Logger logger = LoggerFactory.getLogger(WorkerService.class);
 
-    public WorkerService(JobRepository jobRepository, WorkExecutor workExecutor) {
+    public WorkerService(JobRepository jobRepository, WorkExecutor workExecutor, JobMetrics jobMetrics) {
         this.jobRepository = jobRepository;
         this.workExecutor = workExecutor;
+        this.jobMetrics = jobMetrics;
     }
 
     public Job claimNextJob() {
@@ -45,9 +48,12 @@ public class WorkerService {
 
             try {
                 workExecutor.execute(job);
+                jobMetrics.recordSuccess();
                 job.setStatus(JobStatus.SUCCESS);
                 logger.info("Job id={} completed successfully", jobId);
             } catch (Exception e) {
+                jobMetrics.recordFailure();
+
                 logger.error("Job id={} failed due to {}", jobId, e.getMessage());
 
                 int attempts = job.getAttempts() + 1;

@@ -1,6 +1,7 @@
 package com.worker;
 
 import com.worker.model.Job;
+import com.worker.poller.JobPoller;
 import com.worker.service.WorkerService;
 import org.junit.jupiter.api.Test;
 

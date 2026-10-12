@@ -1,6 +1,7 @@
 package com.worker.service;
 
 import com.worker.executor.WorkExecutor;
+import com.worker.metrics.JobMetrics;
 import com.worker.model.Job;
 import com.worker.model.JobStatus;
 import com.worker.repository.JobRepository;
@@ -19,7 +20,9 @@ class WorkerServiceTest {
     void claimNextJob_marksJobRunningAndReturnsIt() {
         JobRepository repo = mock(JobRepository.class);
         WorkExecutor executor = mock(WorkExecutor.class);
-        WorkerService workerService = new WorkerService(repo, executor);
+        JobMetrics metrics =  mock(JobMetrics.class);
+
+        WorkerService workerService = new WorkerService(repo, executor, metrics);
 
         Job job = new Job();
         job.setId(UUID.randomUUID());
@@ -42,7 +45,9 @@ class WorkerServiceTest {
     void execute_marksJobSuccess() {
         JobRepository repo = mock(JobRepository.class);
         WorkExecutor executor = mock(WorkExecutor.class);
-        WorkerService workerService = new WorkerService(repo, executor);
+        JobMetrics metrics =  mock(JobMetrics.class);
+
+        WorkerService workerService = new WorkerService(repo, executor, metrics);
 
         Job job = new Job();
         job.setId(UUID.randomUUID());
@@ -60,7 +65,9 @@ class WorkerServiceTest {
     void execute_retriesJobAndSchedulesBackoff() throws Exception {
         JobRepository repo = mock(JobRepository.class);
         WorkExecutor executor = mock(WorkExecutor.class);
-        WorkerService workerService = new WorkerService(repo, executor);
+        JobMetrics metrics =  mock(JobMetrics.class);
+
+        WorkerService workerService = new WorkerService(repo, executor, metrics);
 
         Job job = new Job();
         job.setId(UUID.randomUUID());
@@ -73,7 +80,7 @@ class WorkerServiceTest {
         doThrow(new RuntimeException("boom"))
                 .when(executor).execute(any(Job.class));
 
-        workerService.execute(job);   // <-- NO assertThrows
+        workerService.execute(job);
 
         assertEquals(JobStatus.PENDING, job.getStatus());
         assertEquals(1, job.getAttempts());
@@ -84,8 +91,9 @@ class WorkerServiceTest {
     void execute_marksJobFailedPermanentlyAfterMaxAttempts() throws Exception {
         JobRepository repo = mock(JobRepository.class);
         WorkExecutor executor = mock(WorkExecutor.class);
+        JobMetrics metrics =  mock(JobMetrics.class);
 
-        WorkerService workerService = new WorkerService(repo, executor);
+        WorkerService workerService = new WorkerService(repo, executor, metrics);
 
         Job job = new Job();
         job.setId(UUID.randomUUID());
@@ -116,7 +124,9 @@ class WorkerServiceTest {
     void execute_doesNothingIfJobIsNotRunnable() {
         JobRepository repo = mock(JobRepository.class);
         WorkExecutor executor = mock(WorkExecutor.class);
-        WorkerService workerService = new WorkerService(repo, executor);
+        JobMetrics metrics =  mock(JobMetrics.class);
+
+        WorkerService workerService = new WorkerService(repo, executor, metrics);
 
         Job job = new Job();
         job.setId(UUID.randomUUID());

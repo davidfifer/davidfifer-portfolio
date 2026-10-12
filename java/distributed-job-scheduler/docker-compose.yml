@@ -1,0 +1,68 @@
+services:
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:16
+
+    # Initial database configuration
+    environment:
+      POSTGRES_DB: jobs
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    # Map host port 5432 to PostgreSQL's container port
+    ports:
+      - "5432:5432"
+
+    # Check that PostgreSQL is ready to accept connections
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d jobs"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot service responsible for scheduling jobs
+  scheduler-service:
+
+    # Build using the Dockerfile in ./scheduler-service
+    build:
+      context: ./scheduler-service
+
+    # Make the scheduler available on localhost:8080
+    ports:
+      - "8080:8080"
+
+    # Configure the Spring Boot datasource
+    environment:
+      # "postgres" refers to the PostgreSQL service defined above
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jobs
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+    # Start the PostgreSQL container before this service
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+
+  # Spring Boot service responsible for processing jobs
+  worker-service:
+
+    # Build using the Dockerfile in ./worker-service
+    build:
+      context: ./worker-service
+
+    # Make the worker available on localhost:8081
+    ports:
+      - "8081:8081"
+
+    # Connect to the same PostgreSQL database as the scheduler
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jobs
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+    # Start the PostgreSQL container before this service
+    depends_on:
+      postgres:
+        condition: service_healthy
