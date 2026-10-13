@@ -137,7 +137,7 @@ propagation, retry logic, chaos injection, metrics instrumentation, and full Ope
 A deterministic, configuration‑driven CSV cleaning pipeline built for data engineers and automation workflows. It
 provides strict validation, dtype enforcement, profiling metrics, and a clean Typer CLI.
 
-  #### Features include:
+#### Features include:
 
 - Multi‑stage cleaning pipeline
 - YAML/JSON configuration
