@@ -7,13 +7,19 @@ import com.worker.model.JobStatus;
 import com.worker.repository.JobRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class WorkerService {
+
+    @Value("${WORKER_ID:unknown}")
+    private String workerId = "unknown";
 
     private final JobMetrics jobMetrics;
     private final JobRepository jobRepository;
@@ -27,34 +33,35 @@ public class WorkerService {
         this.jobMetrics = jobMetrics;
     }
 
-    public Job claimNextJob() {
-        var jobOpt = jobRepository.findNextRunnableJob(JobStatus.PENDING, Instant.now());
+    @Transactional
+    public Optional<Job> claimNextJob() {
+        var jobOpt = jobRepository.claimNextRunnableJob(Instant.now());
 
         if (jobOpt.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
 
         Job job = jobOpt.get();
         job.setStatus(JobStatus.RUNNING);
 
-        logger.info("Claimed job id={}", job.getId());
-        return jobRepository.save(job);
+        logger.info("[{}] Claimed job id={}", workerId, job.getId());
+        return Optional.of(jobRepository.save(job));
     }
 
     public void execute(Job job) {
         if (isStillRunnable(job)) {
             UUID jobId = job.getId();
-            logger.info("Executing job id={}", jobId);
+            logger.info("[{}] Executing job id={}", workerId, jobId);
 
             try {
                 workExecutor.execute(job);
                 jobMetrics.recordSuccess();
                 job.setStatus(JobStatus.SUCCESS);
-                logger.info("Job id={} completed successfully", jobId);
+                logger.info("[{}] Job id={} completed successfully", workerId, jobId);
             } catch (Exception e) {
                 jobMetrics.recordFailure();
 
-                logger.error("Job id={} failed due to {}", jobId, e.getMessage());
+                logger.error("[{}] Job id={} failed due to {}", workerId, jobId, e.getMessage());
 
                 int attempts = job.getAttempts() + 1;
                 job.setAttempts(attempts);

@@ -14,8 +14,8 @@
 
 A distributed job scheduling system built with Java, Spring Boot, PostgreSQL, and Docker Compose.
 
-This project demonstrates core backend engineering concepts including asynchronous job processing, distributed
-coordination, job lifecycle management, retry handling, exponential backoff, persistence, and containerized services.
+This project demonstrates asynchronous job processing, PostgreSQL-backed distributed coordination, row-level locking,
+transactional job ownership, retry handling, exponential backoff, job lifecycle management, and containerized deployment.
 
 ---
 
@@ -24,9 +24,10 @@ coordination, job lifecycle management, retry handling, exponential backoff, per
 The Distributed Job Scheduler is a multi-service backend application that allows users to submit asynchronous jobs
 for processing.
 
-Jobs are persisted in PostgreSQL and executed by a separate worker service. The system supports job lifecycle
-management, retries with exponential backoff, failure handling, metrics collection, and containerized deployment
-using Docker Compose.
+Jobs are persisted in PostgreSQL and processed by multiple worker instances running concurrently. Workers coordinate
+through PostgreSQL row-level locking to safely claim jobs without duplicate execution. The system supports job lifecycle
+management, retries with exponential backoff, failure handling, metrics collection, and containerized deployment using
+Docker Compose.
 
 This project was built to explore distributed systems concepts commonly found in production backend platforms,
 including background processing, state management, reliability patterns, and service-to-service coordination.
@@ -70,7 +71,8 @@ docker compose up --build
 
 ## Architecture
 
-The system consists of three components:
+The system consists of a scheduler service, a shared PostgreSQL database, and one or more worker instances that process
+jobs concurrently.
 
 ```text
               +---------------------+
@@ -82,15 +84,21 @@ The system consists of three components:
                          v
                  +---------------+
                  | PostgreSQL DB |
-                 +---------------+
+                 +-------+-------+
                          ^
                          |
-                         |
-              +----------+----------+
-              |   Worker Service    |
-              | Poll + Execute Jobs |
-              +---------------------+
+          +--------------+--------------+
+          |              |              |
+          |              |              |
+          |              |              |
+    +-----+-----+  +-----+-----+  +-----+-----+
+    | Worker 1  |  | Worker 2  |  | Worker 3  |
+    | Poll/Exec |  | Poll/Exec |  | Poll/Exec |
+    +-----------+  +-----------+  +-----------+
 ```
+
+Worker instances coordinate through PostgreSQL row-level locking and `FOR UPDATE SKIP LOCKED` to ensure a job is
+claimed by only one worker at a time.
 
 ### Scheduler Service
 
@@ -116,11 +124,44 @@ Stores:
 Responsible for:
 
 - Polling for runnable jobs
-- Claiming jobs for execution
+- Safely claiming jobs using row-level locking
 - Executing work
 - Updating job status
 - Applying retry and backoff logic
 - Recording execution metrics
+
+---
+
+## Distributed Worker Coordination
+
+Multiple worker instances can run concurrently against the same PostgreSQL database.
+
+To safely distribute work, workers claim jobs using PostgreSQL row-level locking with the PostgreSQL clause:
+
+```sql
+FOR UPDATE SKIP LOCKED
+```
+
+This allows workers to claim available jobs without blocking one another while ensuring each job is owned by only one
+worker at a time.
+
+### Example Distributed Job Execution
+
+```text
+[worker-2] Claimed job id=07b1ef9b...
+[worker-1] Claimed job id=558343a4...
+
+[worker-1] Executing job id=558343a4...
+[worker-2] Executing job id=07b1ef9b...
+
+[worker-3] No runnable jobs found
+
+[worker-1] Job completed successfully
+[worker-2] Job completed successfully
+```
+
+In this example, workers 1 and 2 successfully claimed and processed different jobs while worker 3 found no available
+work. This demonstrates safe concurrent job processing with single-worker job ownership and no duplicate execution.
 
 ---
 
@@ -139,6 +180,12 @@ PENDING → RUNNING → FAILED
 
 FAILED (after max retry attempts)
 ```
+
+### Distributed Processing
+
+- Multiple worker instances process jobs concurrently
+- PostgreSQL row-level locking prevents duplicate execution
+- Transactional job claiming guarantees single-worker ownership
 
 ---
 
@@ -162,12 +209,13 @@ Attempt 4 → 16 seconds
 
 ---
 
-## Basic Metrics
+## Observability
 
-The worker records:
+The worker exposes basic operational metrics and structured logging for:
 
 - Successful job executions
 - Failed job executions
+- Worker activity and job processing events
 
 ---
 
@@ -210,10 +258,11 @@ distributed-job-scheduler
 ### Submit a Job
 
 ```shell
-curl -X POST http://localhost:8080/jobs \
+curl -X POST http://localhost:8080/jobs/submit \
   -H "Content-Type: application/json" \
   -d '{
-    "payload":"example job"
+    "payload":"{}",
+    "maxAttempts":5
   }'
 ```
 
@@ -229,12 +278,15 @@ curl http://localhost:8080/jobs/{jobId}
 
 This project demonstrates several common distributed-system patterns:
 
-- Persistent job queue
+- Persistent PostgreSQL-backed job queue
+- Multi-worker job processing
+- PostgreSQL row-level locking
+- FOR UPDATE SKIP LOCKED job claiming
+- Transactional job ownership
 - State transitions
 - Retry handling
 - Exponential backoff
 - Failure recovery
-- Distributed worker architecture
 - Structured logging
 - Basic operational metrics
 
@@ -244,8 +296,6 @@ This project demonstrates several common distributed-system patterns:
 
 Planned improvements include:
 
-- Multiple worker instances
-- Row-level locking for job claiming
 - Cron scheduling
 - Priority queues
 - Dead-letter queue support

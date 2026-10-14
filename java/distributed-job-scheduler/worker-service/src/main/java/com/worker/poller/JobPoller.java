@@ -4,11 +4,17 @@ import com.worker.model.Job;
 import com.worker.service.WorkerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class JobPoller {
+
+    @Value("${WORKER_ID:unknown}")
+    private String workerId = "unknown";
 
     private final WorkerService workerService;
     private static final Logger logger = LoggerFactory.getLogger(JobPoller.class);
@@ -19,16 +25,16 @@ public class JobPoller {
 
     @Scheduled(fixedDelay = 10000)
     public void poll() {
-        logger.info("Polling for jobs...");
+        logger.info("[{}] Polling for jobs...", workerId);
 
-        Job job = workerService.claimNextJob();
+        Optional<Job> jobOpt = workerService.claimNextJob();
 
-        if (job == null) {
-            logger.info("No runnable jobs found");
+        if (jobOpt.isEmpty()) {
+            logger.info("[{}] No runnable jobs found", workerId);
             return;
         }
 
-        logger.info("Executing job id={}", job.getId());
+        Job job = jobOpt.get();
         workerService.execute(job);
     }
 }

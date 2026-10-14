@@ -29,16 +29,17 @@ class WorkerServiceTest {
         job.setStatus(JobStatus.PENDING);
         job.setNextRunAt(Instant.now());
 
-        when(repo.findNextRunnableJob(eq(JobStatus.PENDING), any(Instant.class)))
+        when(repo.claimNextRunnableJob(any(Instant.class)))
                 .thenReturn(Optional.of(job));
 
         when(repo.save(any(Job.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Job claimed = workerService.claimNextJob();
+        Optional<Job> claimed = workerService.claimNextJob();
+        Job jobOpt = claimed.get();
 
         assertNotNull(claimed);
-        assertEquals(JobStatus.RUNNING, claimed.getStatus());
-        verify(repo).save(claimed);
+        assertEquals(JobStatus.RUNNING, jobOpt.getStatus());
+        verify(repo).save(jobOpt);
     }
 
     @Test
