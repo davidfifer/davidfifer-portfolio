@@ -5,6 +5,9 @@ import com.worker.poller.JobPoller;
 import com.worker.service.WorkerService;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import static org.mockito.Mockito.*;
 
 class JobPollerTest {
@@ -14,7 +17,7 @@ class JobPollerTest {
         WorkerService workerService = mock(WorkerService.class);
         JobPoller poller = new JobPoller(workerService);
 
-        when(workerService.claimNextJob()).thenReturn(null);
+        when(workerService.claimNextJob()).thenReturn(Optional.empty());
 
         poller.poll();
 
@@ -27,7 +30,8 @@ class JobPollerTest {
         JobPoller poller = new JobPoller(workerService);
 
         Job job = new Job();
-        when(workerService.claimNextJob()).thenReturn(job);
+        job.setId(UUID.randomUUID());
+        when(workerService.claimNextJob()).thenReturn(Optional.of(job));
 
         poller.poll();
 
