@@ -22,8 +22,8 @@
 A curated collection of backend engineering, reliability-focused, automation, data-processing, and algorithmic systems
 projects built to demonstrate clean architecture, modern tooling, and production‑grade development practices. This
 repository serves as a unified portfolio showcasing work across Java, Spring Boot, Python, FastAPI microservices,
-distributed tracing, observability tooling, distributed job scheduling, CLI utilities, data cleaning pipelines, rate
-limiting,and Dockerized services.
+distributed tracing, observability tooling, distributed job scheduling and worker coordination, CLI utilities, data
+cleaning pipelines, rate limiting, and Dockerized services.
 
 Each project is designed to be practical, configurable, and easy to run, reflecting real-world engineering patterns such
 as declarative configuration, layered architecture, strict validation, automated workflows, and end-to-end observability.
@@ -34,32 +34,37 @@ as declarative configuration, layered architecture, strict validation, automated
 
 ### Distributed Job Scheduler - Spring Boot + PostgreSQL + Docker Compose
 
-A distributed job scheduling platform built with Spring Boot and PostgreSQL that demonstrates core backend and distributed systems concepts including job polling, concurrent worker execution, retry handling, scheduling logic, observability, and containerized deployment. Designed to showcase production-oriented patterns commonly found in workflow engines, task queues, and background processing systems.
+A distributed job scheduling platform built with Spring Boot and PostgreSQL that demonstrates backend and distributed
+systems concepts including multi-worker coordination, PostgreSQL row-level locking, transactional job ownership, retry
+handling, observability, and containerized deployment.
 
 #### Key capabilities:
 
-- REST API for job submission and management
-- PostgreSQL-backed durable job storage
-- Scheduled worker polling for pending jobs
+- REST API for job submission and status tracking
+- PostgreSQL-backed durable job queue
+- Multi-worker job processing with Docker Compose
+- Distributed job coordination using FOR UPDATE SKIP LOCKED
+- Transactional job ownership and duplicate-execution prevention
 - Job lifecycle tracking (PENDING, RUNNING, SUCCESS, FAILED)
-- Configurable retry handling with delayed re-execution
-- Concurrent job execution using thread pools
-- Health checks and readiness endpoints
-- Micrometer metrics for execution and failure tracking
-- Docker Compose orchestration
-- Structured logging for job lifecycle events
-- Example architecture and deployment documentation
+- Configurable retry handling with exponential backoff
+- PostgreSQL row-level locking for safe concurrent processing
+- Micrometer metrics and structured logging
+- Health checks and containerized deployment
+- Architecture and operational documentation
 
 #### Demonstrates:
 
-- Distributed systems fundamentals
+- Distributed worker coordination
+- PostgreSQL row-level locking
+- FOR UPDATE SKIP LOCKED work distribution
+- Transactional consistency and job ownership
 - Background job processing patterns
-- Concurrent execution and thread management
-- Database-backed workflow coordination
-- Reliability engineering and retry strategies
+- Retry and exponential backoff strategies
+- Stateful workflow and lifecycle management
+- Reliability engineering concepts
 - Spring Boot scheduling and asynchronous processing
 - Observability and operational visibility
-- Containerized service deployment
+- Containerized multi-service deployment
 
 ---
 
@@ -170,13 +175,17 @@ brittle one‑off scripts.
 
 ### This portfolio is designed to showcase:
 
-- **Backend engineering expertise:** Spring Boot, PostgreSQL, JWT, layered architecture, asynchronous processing, and Docker Compose.
-- **Reliability & observability:** Distributed tracing, Prometheus metrics, structured logging, health monitoring, retry handling, and chaos testing.
+- **Backend engineering expertise:** Spring Boot, PostgreSQL, JWT, layered architecture, asynchronous processing, and
+    Docker Compose.
+- **Reliability & observability:** Distributed tracing, Prometheus metrics, structured logging, health monitoring,
+    retry handling, and chaos testing.
 - **Automation & tooling:** Python utilities, CLI design, configuration-driven workflows.
 - **Data engineering fundamentals:** Deterministic pipelines, validation, profiling, schema enforcement.
-- **Distributed systems concepts:** Background job processing, workflow coordination, concurrent execution, scheduling, and fault-tolerant design.
+- **Distributed systems concepts:** Background job processing, distributed worker coordination, PostgreSQL row-level
+    locking, workflow orchestration, concurrent execution, scheduling, and fault-tolerant design.
 - **Software craftsmanship:** Clean code, documentation, testing, error handling, cross-platform support.
-- **Real-world patterns:** Declarative configuration, retry strategies, job scheduling, concurrent processing, logging pipelines, and containerization.
+- **Real-world patterns:** Declarative configuration, retry strategies, job scheduling, concurrent processing,
+    logging pipelines, and containerization.
 
 Each project is self‑contained with its own README, installation instructions, architecture notes, and roadmap.
 
@@ -190,6 +199,8 @@ Each project is self‑contained with its own README, installation instructions,
 - Spring Scheduling
 - Concurrent job execution
 - Distributed workflow processing
+- Distributed worker coordination
+- PostgreSQL row-level locking
 - Retry and failure handling patterns
 - Micrometer metrics
 - Health checks and service monitoring
